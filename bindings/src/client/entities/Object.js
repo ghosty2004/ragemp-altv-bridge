@@ -246,6 +246,9 @@ export class _NetworkObject extends _Object {
             if (shouldCancel()) return;
 
             this.#handle = natives.createObject(model, this.alt.pos.x, this.alt.pos.y, this.alt.pos.z, false, false, false);
+            if (!this.#handle) {
+                throw new Error('Failed to create object using native:', model);
+            }
             natives.setEntityCoordsNoOffset(this.#handle, this.alt.pos.x, this.alt.pos.y, this.alt.pos.z, false, false, false);
             store.add(this, undefined, this.#handle, undefined);
 
@@ -260,12 +263,12 @@ export class _NetworkObject extends _Object {
 
             natives.freezeEntityPosition(this.#handle, true);
             natives.setVehicleColourCombination(this.#handle, 0);
+
+            if (this.alt.valid) mp.events.dispatchLocal('entityStreamIn', this);
         } catch (e) {
             console.warn('Failed to stream in NetworkObject:', e);
             mp._notifyError(e, 'unknown', 0, e.stack, 'warning');
         }
-
-        if (this.alt.valid) mp.events.dispatchLocal('entityStreamIn', this);
     }
 
     streamOut() {
